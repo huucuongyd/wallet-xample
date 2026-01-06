@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  gateway:
+    image: gateway:latest
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - users
+      - logger
+      - payment
+    networks:
+      - internal-network
+  users:
+    image: users:latest
+  logger:
+    image: logger:latest
+  payment:
+    image: payment:latest
+  auth:
+    image: auth:latest
+  rabbitmq:
+    image: rabbitmq:latest
+    ports:
+      - 5672:5672
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+    networks:
+      - internal-network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+  postgres:
+    image: postgres:latest
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=postgres
+    networks:
+      - internal-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    networks:
+      - internal-network
+    volumes:
+      - redis_data:/data
+volumes:
+  rabbitmq_data:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+networks:
+  internal-network:
+    driver: bridge
